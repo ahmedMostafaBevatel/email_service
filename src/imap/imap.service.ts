@@ -2,42 +2,50 @@ import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import * as Imap from 'node-imap';
 import { simpleParser } from 'mailparser';
 import { ConfigService } from '@nestjs/config';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class ImapService implements OnModuleInit, OnModuleDestroy {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly userService: UserService,
+  ) {}
   //   private imap: Imap;
 
-  onModuleInit() {
-    let emailAccounts = [
-      {
-        user: process.env.USER_EMAIL_1,
-        password: process.env.USER_PASSWORD_1,
-        host: 'imap.gmail.com',
-        port: 993,
-        debug: console.log,
-        tls: true,
-        keepalive: {
-          interval: 60000,
-          idleInterval: 60000,
-          forceNoop: false,
-        },
-      },
-      {
-        user: process.env.USER_EMAIL_2,
-        password: process.env.USER_PASSWORD_2,
-        host: 'imap.gmail.com',
-        port: 993,
-        debug: console.log,
-        tls: true,
-        keepalive: {
-          interval: 60000,
-          idleInterval: 60000,
-          forceNoop: false,
-        },
-      },
-    ];
-    emailAccounts.forEach((account) => this.startMailListeners(account));
+  async onModuleInit() {
+    // let emailAccounts = [
+    //   {
+    //     user: process.env.USER_EMAIL_1,
+    //     password: process.env.USER_PASSWORD_1,
+    //     host: 'imap.gmail.com',
+    //     port: 993,
+    //     debug: console.log,
+    //     tls: true,
+    //     keepalive: {
+    //       interval: 60000,
+    //       idleInterval: 60000,
+    //       forceNoop: false,
+    //     },
+    //   },
+    //   {
+    //     user: process.env.USER_EMAIL_2,
+    //     password: process.env.USER_PASSWORD_2,
+    //     host: 'imap.gmail.com',
+    //     port: 993,
+    //     debug: console.log,
+    //     tls: true,
+    //     keepalive: {
+    //       interval: 60000,
+    //       idleInterval: 60000,
+    //       forceNoop: false,
+    //     },
+    //   },
+    // ];
+    // get all emails from db
+    let savedEmails = await this.userService.getAllUsers();
+    console.log(savedEmails);
+
+    savedEmails.forEach((account) => this.startMailListeners(account));
   }
 
   onModuleDestroy() {
